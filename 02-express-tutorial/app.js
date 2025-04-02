@@ -1,31 +1,34 @@
-const http = require('http')
-const {readFileSync} = require('fs');
+const express = require('express')
+const app = express()
+const {products} = require('./data')
 
-// get all files
-const homePage = readFileSync('./index.html')
-
-const server = http.createServer((req, res) => {
-    // console.log(req.method)
-    // console.log(req.url)
-    const url = req.url;
-    // home page
-    if(url === '/') {
-        res.writeHead(200, {'content-type':'text/html'})
-        res.write(homePage)
-        res.end()
-    }
-    // about page
-    else if (url === '/about') {
-        res.writeHead(200, {'content-type': 'text/html'})
-        res.write('<h1>about page</h1>')
-        res.end()
-    }
-    // 404
-    else {
-        res.writeHead(404, {'content-type':'text/html'})
-        res.write('<h1>page not found</h1>')
-        res.end()
-    }
+app.get('/', (req, res)=>{
+    res.send('<h1> Home Page </h1><a href="/api/products"></a>')
 })
 
-server.listen(5000)
+app.get('/api/products',(req, res)=>{
+    const newProduct = products.map((product)=> {
+        const {id, name, image} = product;
+        return {id, name ,image}
+    })
+    res.json(newProduct)
+})
+
+app.get('/api/products/:productID',(req, res)=>{
+    // console.log(req)
+    // console.log(req.params)
+    const {productID} = req.params;
+
+    const singleProduct = products.find((product) => product.id === Number(productID))
+
+    if(!singleProduct){
+        return res.status(404).send('Product Does Not Exist')
+    }
+
+    console.log(singleProduct);
+    res.json(singleProduct)
+})
+
+app.listen(5000, ()=>{
+    console.log('Server is listening on port 5000...');
+})
