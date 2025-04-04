@@ -1,22 +1,31 @@
 const express = require('express')
 const app = express()
+const logger = require('./logger.js')
+const authorize = require('./authorize.js')
 
 // req => middleware => res
 
-const logger = (req,res,next) => {
-    const method = req.method
-    const url = req.url
-    const time = new Date().getFullYear()
-    console.log(method, url, time)
-    next()
-}
+// 1. use vs route
+// 2. options - our own / express / third party
 
-app.get('/', logger,(req,res) => {  
+// app.use([logger, authorize])
+// app.use(express.static('./public'))
+
+app.get('/',(req,res) => {  
     res.send('Home')
 })
 
 app.get('/about', (req,res) => {
     res.send('About')
+})
+
+app.get('/api/products', (req,res) => {
+    res.send('Products')
+})
+
+app.get('/api/items', [logger, authorize], (req,res) => {
+    console.log(req.user)
+    res.send('Items')
 })
 
 app.listen(5000, ()=>{
